@@ -49,7 +49,6 @@
 \newcommand{\beatsperline}{16}
 \newcommand{\staffleft}{2.35}
 \newcommand{\beatspacing}{0.76}
-\newcommand{\staffright}{14.60}
 
 \newcommand{\drawbassclef}{%
   \begin{scope}[shift={(0.65,0.15)}, line width=0.9pt]
@@ -66,18 +65,21 @@
   \end{scope}
 }
 
-\newcommand{\drawstaffbase}{%
+\newcommand{\drawstaffbase}[1]{%
+  \pgfmathparse{max(\beatspermeasure, ceil((#1) / \beatspermeasure) * \beatspermeasure)}%
+  \xdef\displaybeats{\pgfmathresult}%
+  \pgfmathsetmacro{\staffright}{\staffleft + (\displaybeats - 0.5) * \beatspacing + 0.55}
   \foreach \y in {0,0.5,1,1.5,2} {
     \draw[line width=0.4pt] (0,\y) -- (\staffright,\y);
   }
   \drawbassclef
   \node[font=\small] at (1.55,1.00) {$\mathbf{\frac{4}{4}}$};
-  \pgfmathtruncatemacro{\internalbars}{\measuresperline - 1}
+  \pgfmathtruncatemacro{\internalbars}{max(0, int(\displaybeats / \beatspermeasure) - 1)}
   \foreach \measure in {1,...,\internalbars} {
     \pgfmathsetmacro{\barx}{\staffleft + (\measure * \beatspermeasure - 0.5) * \beatspacing}
     \draw[line width=0.6pt] (\barx,-0.12) -- (\barx,2.12);
   }
-  \pgfmathsetmacro{\finalbarx}{\staffleft + (\beatsperline - 0.5) * \beatspacing}
+  \pgfmathsetmacro{\finalbarx}{\staffleft + (\displaybeats - 0.5) * \beatspacing}
   \draw[line width=1.0pt] (\finalbarx,-0.12) -- (\finalbarx,2.12);
 }
 
@@ -139,35 +141,29 @@
   \def\noteduration{#3}%
   \drawledgerlines{\x}{\y}
   \drawaccidental{\x}{\y}{\pitchaccidental{#2}}
-  \ifdim \noteduration pt > 3pt
+  \ifdim \noteduration pt = 4pt
     \draw[rotate around={-18:(\x,\y)}, line width=0.8pt] (\x,\y) ellipse (0.18 and 0.12);
-  \else\ifdim \noteduration pt > 1pt
+  \else\ifdim \noteduration pt = 2pt
     \draw[rotate around={-18:(\x,\y)}, line width=0.8pt] (\x,\y) ellipse (0.16 and 0.11);
+    \drawstemandflags{\x}{\y}{\noteduration}
+  \else\ifdim \noteduration pt = 1pt
+    \fill[rotate around={-18:(\x,\y)}] (\x,\y) ellipse (0.15 and 0.11);
     \drawstemandflags{\x}{\y}{\noteduration}
   \else
     \fill[rotate around={-18:(\x,\y)}] (\x,\y) ellipse (0.15 and 0.11);
     \drawstemandflags{\x}{\y}{\noteduration}
-  \fi\fi
+  \fi\fi\fi
   \node[font=\tiny, align=center] at (\x,-1.00) {#4};
 }
 
 \newcommand{\drawrestsymbol}[3]{%
   \pgfmathsetmacro{\x}{\staffleft + (#1) * \beatspacing}
   \def\restduration{#2}%
-  \ifdim \restduration pt > 3pt
+  \ifdim \restduration pt = 4pt
     \fill (\x - 0.18,1.20) rectangle (\x + 0.18,1.05);
-  \else\ifdim \restduration pt > 1pt
+  \else\ifdim \restduration pt = 2pt
     \fill (\x - 0.18,1.55) rectangle (\x + 0.18,1.40);
-  \else\ifdim \restduration pt < 1pt
-    \begin{scope}[shift={(\x,1.20)}, line width=0.8pt]
-      \draw
-        (0.02,0.58)
-        .. controls (0.17,0.38) and (0.00,0.20) .. (0.11,0.00)
-        .. controls (0.22,-0.18) and (0.06,-0.38) .. (-0.04,-0.54);
-      \draw (0.09,0.10) .. controls (0.26,-0.02) and (0.18,-0.20) .. (0.04,-0.30);
-      \draw (-0.02,-0.54) -- (0.15,-0.92);
-    \end{scope}
-  \else
+  \else\ifdim \restduration pt = 1pt
     \begin{scope}[shift={(\x,1.10)}, line width=0.8pt]
       \draw
         (0.03,0.62)
@@ -176,14 +172,23 @@
       \draw (0.13,0.32) -- (-0.10,-0.06);
       \draw (-0.02,-0.58) -- (0.16,-0.95);
     \end{scope}
+  \else
+    \begin{scope}[shift={(\x,1.20)}, line width=0.8pt]
+      \draw
+        (0.02,0.58)
+        .. controls (0.17,0.38) and (0.00,0.20) .. (0.11,0.00)
+        .. controls (0.22,-0.18) and (0.06,-0.38) .. (-0.04,-0.54);
+      \draw (0.09,0.10) .. controls (0.26,-0.02) and (0.18,-0.20) .. (0.04,-0.30);
+      \draw (-0.02,-0.54) -- (0.15,-0.92);
+    \end{scope}
   \fi\fi\fi
   \node[font=\tiny, align=center] at (\x,-1.00) {#3};
 }
 
-\newcommand{\musicline}[1]{%
+\newcommand{\musicline}[2]{%
   \begin{center}
     \begin{tikzpicture}[x=1cm,y=1cm]
-      \drawstaffbase
+      \drawstaffbase{#2}
       #1
     \end{tikzpicture}
   \end{center}
@@ -196,7 +201,7 @@
 
 \newcommand{\flushmusicline}{%
   \ifx\currentmusiccommands\@empty\else
-    \musicline{\currentmusiccommands}%
+    \musicline{\currentmusiccommands}{\linebeat}%
     \gdef\currentmusiccommands{}%
     \xdef\linebeat{0}%
   \fi
@@ -214,9 +219,9 @@
   \ifnum\pgfmathresult=1
     \PackageError{transcription}{Event duration #1 must be positive}{Use a duration greater than zero.}%
   \fi
-  \pgfmathparse{#1 > \beatspermeasure ? 1 : 0}%
+  \pgfmathparse{abs((#1) * 2 - round((#1) * 2)) > 0.001 ? 1 : 0}%
   \ifnum\pgfmathresult=1
-    \PackageError{transcription}{Event duration #1 exceeds beats per measure \beatspermeasure}{Split the event across measures or increase \string\beatspermeasure.}%
+    \PackageError{transcription}{Event duration #1 is not supported}{Use durations in half-beat increments.}%
   \fi
 }
 
@@ -247,53 +252,71 @@
   \next
 }
 
-\newcommand{\padtomeasureboundary}{%
-  \pgfmathsetmacro{\measureoffset}{mod(\linebeat,\beatspermeasure)}%
-  \pgfmathparse{\measureoffset > 0 ? 1 : 0}%
-  \ifnum\pgfmathresult=1
-    \pgfmathparse{\beatspermeasure - \measureoffset}%
-    \xdef\paddingduration{\pgfmathresult}%
-    \appendrestcommand{\linebeat}{\paddingduration}{}%
-    \advancebeat{\paddingduration}%
-  \fi
-}
-
-\newcommand{\prepareforevent}[1]{%
+\newcommand{\prepareforsegment}{%
   \pgfmathparse{\linebeat >= \beatsperline ? 1 : 0}%
   \ifnum\pgfmathresult=1
     \flushmusicline
   \fi
-  \pgfmathparse{\linebeat + (#1) > \beatsperline ? 1 : 0}%
-  \ifnum\pgfmathresult=1
-    \pgfmathsetmacro{\measureoffset}{mod(\linebeat,\beatspermeasure)}%
-    \pgfmathparse{\measureoffset > 0 ? 1 : 0}%
-    \ifnum\pgfmathresult=1
-      \padtomeasureboundary
-    \fi
-    \flushmusicline
-  \fi
+}
+
+\newcommand{\selectsegmentduration}[1]{%
+  \pgfmathparse{(#1) >= 4 ? 4 : ((#1) >= 2 ? 2 : ((#1) >= 1 ? 1 : 0.5))}%
+  \xdef\segmentduration{\pgfmathresult}%
 }
 
 \newcommand{\NoteEvent}[3]{%
   \validateeventduration{#2}%
-  \prepareforevent{#2}%
-  \edef\eventstart{\linebeat}%
-  \appendnotecommand{\eventstart}{#1}{#2}{#3}%
-  \advancebeat{#2}%
+  \xdef\remainingduration{#2}%
+  \def\currentlyric{#3}%
+  \loop
+    \pgfmathparse{\remainingduration > 0 ? 1 : 0}%
+  \ifnum\pgfmathresult=1
+    \prepareforsegment
+    \pgfmathsetmacro{\measureoffset}{mod(\linebeat,\beatspermeasure)}%
+    \pgfmathparse{\measureoffset == 0 ? \beatspermeasure : \beatspermeasure - \measureoffset}%
+    \xdef\spaceinmeasure{\pgfmathresult}%
+    \pgfmathparse{\beatsperline - \linebeat}%
+    \xdef\spaceinline{\pgfmathresult}%
+    \pgfmathparse{min(\remainingduration, min(\spaceinmeasure, \spaceinline))}%
+    \xdef\segmentlimit{\pgfmathresult}%
+    \selectsegmentduration{\segmentlimit}%
+    \edef\eventstart{\linebeat}%
+    \appendnotecommand{\eventstart}{#1}{\segmentduration}{\currentlyric}%
+    \advancebeat{\segmentduration}%
+    \pgfmathparse{\remainingduration - \segmentduration}%
+    \xdef\remainingduration{\pgfmathresult}%
+    \def\currentlyric{}%
+  \repeat
 }
 
 \newcommand{\RestEvent}[2]{%
   \validateeventduration{#1}%
-  \prepareforevent{#1}%
-  \edef\eventstart{\linebeat}%
-  \appendrestcommand{\eventstart}{#1}{#2}%
-  \advancebeat{#1}%
+  \xdef\remainingduration{#1}%
+  \def\currentrestlyric{#2}%
+  \loop
+    \pgfmathparse{\remainingduration > 0 ? 1 : 0}%
+  \ifnum\pgfmathresult=1
+    \prepareforsegment
+    \pgfmathsetmacro{\measureoffset}{mod(\linebeat,\beatspermeasure)}%
+    \pgfmathparse{\measureoffset == 0 ? \beatspermeasure : \beatspermeasure - \measureoffset}%
+    \xdef\spaceinmeasure{\pgfmathresult}%
+    \pgfmathparse{\beatsperline - \linebeat}%
+    \xdef\spaceinline{\pgfmathresult}%
+    \pgfmathparse{min(\remainingduration, min(\spaceinmeasure, \spaceinline))}%
+    \xdef\segmentlimit{\pgfmathresult}%
+    \selectsegmentduration{\segmentlimit}%
+    \edef\eventstart{\linebeat}%
+    \appendrestcommand{\eventstart}{\segmentduration}{\currentrestlyric}%
+    \advancebeat{\segmentduration}%
+    \pgfmathparse{\remainingduration - \segmentduration}%
+    \xdef\remainingduration{\pgfmathresult}%
+    \def\currentrestlyric{}%
+  \repeat
 }
 
 \newcommand{\RenderTranscription}[1]{%
   \resetmusicstate
   #1%
-  \padtomeasureboundary
   \flushmusicline
 }
 
