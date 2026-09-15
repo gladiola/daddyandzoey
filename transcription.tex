@@ -1,0 +1,39 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{lyluatex}
+\pagestyle{plain}
+
+\begin{document}
+
+\section*{Approximate Transcription of \texttt{signal-2026-09-15-08-11-29-091.aac}}
+This is an automatically derived, approximate monophonic transcription from the AAC recording.
+
+\begin{lilypond}
+\version "2.24.0"
+\header { tagline = ##f }
+
+melody = {
+  \clef bass
+  \key c \minor
+  \time 4/4
+  \tempo 4 = 152
+  \cadenzaOn
+
+  ees4 e16 g2 d4
+  des\breve
+  b,4 ees8 e8 fis8. a4 fis8.
+  ees4 des1.
+  bes,2 des4 b,4 c8 ees4 e2
+  d4. d4. f8 f4 fis8 g4 g8.
+  gis4 g2. bes,4. ees2 e2 d2
+
+  \bar "|."
+}
+
+\score {
+  \new Staff \melody
+  \layout { }
+}
+\end{lilypond}
+
+\end{document}
