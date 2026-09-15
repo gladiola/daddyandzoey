@@ -4,7 +4,7 @@ This repository contains an AAC recording and a LilyPond-based LaTeX transcripti
 
 ## Build
 
-Compile `/home/runner/work/daddyandzoey/daddyandzoey/transcription.tex` with **LuaLaTeX**, not pdfLaTeX:
+Compile `transcription.tex` with **LuaLaTeX**, not pdfLaTeX:
 
 ```bash
 lualatex transcription.tex
