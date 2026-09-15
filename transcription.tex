@@ -210,9 +210,9 @@
 }
 
 \newcommand{\validateeventduration}[1]{%
-  \pgfmathparse{#1 > \beatsperline ? 1 : 0}%
+  \pgfmathparse{#1 > \beatspermeasure ? 1 : 0}%
   \ifnum\pgfmathresult=1
-    \PackageError{transcription}{Event duration #1 exceeds beats per line \beatsperline}{Reduce the event duration or increase \string\beatsperline.}%
+    \PackageError{transcription}{Event duration #1 exceeds beats per measure \beatspermeasure}{Split the event across measures or increase \string\beatspermeasure.}%
   \fi
 }
 
