@@ -7,16 +7,49 @@
 \setlength{\parindent}{0pt}
 
 \makeatletter
-\newcommand{\definepitch}[2]{\expandafter\def\csname pitch@#1\endcsname{#2}}
+\newcommand{\definepitch}[3]{%
+  \expandafter\def\csname pitch@#1\endcsname{#2}%
+  \expandafter\def\csname accidental@#1\endcsname{#3}%
+}
 \newcommand{\pitchy}[1]{\csname pitch@#1\endcsname}
+\newcommand{\pitchaccidental}[1]{\csname accidental@#1\endcsname}
 \makeatother
 
-\definepitch{C}{0.5}
-\definepitch{D}{1.0}
-\definepitch{E}{1.5}
-\definepitch{F}{2.0}
-\definepitch{G}{2.5}
-\definepitch{A}{3.0}
+\definepitch{E2}{-1.50}{}
+\definepitch{F2}{-1.25}{}
+\definepitch{Fs2}{-1.25}{sharp}
+\definepitch{G2}{-1.00}{}
+\definepitch{Gs2}{-1.00}{sharp}
+\definepitch{A2}{-0.75}{}
+\definepitch{Bb2}{-0.50}{flat}
+\definepitch{B2}{-0.25}{}
+\definepitch{C3}{0.00}{}
+\definepitch{Cs3}{0.00}{sharp}
+\definepitch{D3}{0.25}{}
+\definepitch{Eb3}{0.50}{flat}
+\definepitch{E3}{0.50}{}
+\definepitch{F3}{0.75}{}
+\definepitch{Fs3}{0.75}{sharp}
+\definepitch{G3}{1.00}{}
+\definepitch{Gs3}{1.00}{sharp}
+\definepitch{A3}{1.25}{}
+\definepitch{Bb3}{1.50}{flat}
+\definepitch{B3}{1.75}{}
+\definepitch{C4}{2.00}{}
+\definepitch{Cs4}{2.00}{sharp}
+\definepitch{D4}{2.25}{}
+\definepitch{Eb4}{2.50}{flat}
+\definepitch{E4}{2.50}{}
+\definepitch{F4}{2.75}{}
+\definepitch{Fs4}{2.75}{sharp}
+\definepitch{G4}{3.00}{}
+
+\newcommand{\beatspermeasure}{4}
+\newcommand{\measuresperline}{4}
+\newcommand{\beatsperline}{16}
+\newcommand{\staffleft}{2.35}
+\newcommand{\beatspacing}{0.76}
+\newcommand{\staffright}{14.60}
 
 \newcommand{\drawbassclef}{%
   \begin{scope}[shift={(0.65,0.15)}, line width=0.9pt]
@@ -35,39 +68,116 @@
 
 \newcommand{\drawstaffbase}{%
   \foreach \y in {0,0.5,1,1.5,2} {
-    \draw[line width=0.4pt] (0,\y) -- (14.6,\y);
+    \draw[line width=0.4pt] (0,\y) -- (\staffright,\y);
   }
   \drawbassclef
   \node[font=\small] at (1.55,1.00) {$\mathbf{\frac{4}{4}}$};
-  \foreach \b in {4,8,12,16} {
-    \pgfmathsetmacro{\barx}{2.35 + (\b - 0.5) * 0.76}
+  \pgfmathtruncatemacro{\internalbars}{\measuresperline - 1}
+  \foreach \measure in {1,...,\internalbars} {
+    \pgfmathsetmacro{\barx}{\staffleft + (\measure * \beatspermeasure - 0.5) * \beatspacing}
     \draw[line width=0.6pt] (\barx,-0.12) -- (\barx,2.12);
   }
+  \pgfmathsetmacro{\finalbarx}{\staffleft + (\beatsperline - 0.5) * \beatspacing}
+  \draw[line width=1.0pt] (\finalbarx,-0.12) -- (\finalbarx,2.12);
 }
 
-\newcommand{\qnote}[3]{%
-  \pgfmathsetmacro{\x}{2.35 + (#1 - 1) * 0.76}
-  \pgfmathsetmacro{\y}{\pitchy{#2}}
-  \fill[rotate around={-18:(\x,\y)}] (\x,\y) ellipse (0.15 and 0.11);
-  \ifdim \y pt > 1.75pt
-    \draw[line width=0.8pt] (\x - 0.12,\y) -- (\x - 0.12,\y - 1.35);
-  \else
-    \draw[line width=0.8pt] (\x + 0.12,\y) -- (\x + 0.12,\y + 1.35);
+\newcommand{\drawaccidental}[3]{%
+  \def\accidentaltype{#3}%
+  \ifx\accidentaltype\@empty\else
+    \def\sharpsymbol{sharp}%
+    \def\flatsymbol{flat}%
+    \def\naturalsymbol{natural}%
+    \ifx\accidentaltype\sharpsymbol
+      \node[font=\scriptsize] at (#1 - 0.30,#2) {$\sharp$};
+    \else\ifx\accidentaltype\flatsymbol
+      \node[font=\scriptsize] at (#1 - 0.28,#2) {$\flat$};
+    \else\ifx\accidentaltype\naturalsymbol
+      \node[font=\scriptsize] at (#1 - 0.28,#2) {$\natural$};
+    \fi\fi\fi
   \fi
-  \node[font=\tiny, align=center] at (\x,-0.78) {#3};
 }
 
-\newcommand{\qrest}[2]{%
-  \pgfmathsetmacro{\x}{2.35 + (#1 - 1) * 0.76}
-  \begin{scope}[shift={(\x,1.10)}, line width=0.8pt]
-    \draw
-      (0.03,0.62)
-      .. controls (0.19,0.40) and (-0.02,0.20) .. (0.15,-0.02)
-      .. controls (0.28,-0.22) and (0.12,-0.42) .. (-0.02,-0.58);
-    \draw (0.13,0.32) -- (-0.10,-0.06);
-    \draw (-0.02,-0.58) -- (0.16,-0.95);
-  \end{scope}
-  \node[font=\tiny, align=center] at (\x,-0.78) {#2};
+\newcommand{\drawledgerlines}[2]{%
+  \pgfmathtruncatemacro{\belowcount}{max(0, int(floor((0 - (#2) - 0.5) / 0.5)) + 1)}
+  \ifnum\belowcount>0
+    \foreach \step in {1,...,\belowcount} {
+      \pgfmathsetmacro{\ledgery}{0 - 0.5 * \step}
+      \draw[line width=0.5pt] (#1 - 0.26,\ledgery) -- (#1 + 0.26,\ledgery);
+    }
+  \fi
+  \pgfmathtruncatemacro{\abovecount}{max(0, int(floor(((#2) - 2 - 0.5) / 0.5)) + 1)}
+  \ifnum\abovecount>0
+    \foreach \step in {1,...,\abovecount} {
+      \pgfmathsetmacro{\ledgery}{2 + 0.5 * \step}
+      \draw[line width=0.5pt] (#1 - 0.26,\ledgery) -- (#1 + 0.26,\ledgery);
+    }
+  \fi
+}
+
+\newcommand{\drawstemandflags}[3]{%
+  \pgfmathparse{#2 > 1 ? 1 : 0}%
+  \ifnum\pgfmathresult=1
+    \draw[line width=0.8pt] (#1 - 0.12,#2) -- (#1 - 0.12,#2 - 1.35);
+    \ifdim #3pt < 1pt
+      \draw[line width=0.8pt]
+        (#1 - 0.12,#2 - 1.35)
+        .. controls (#1 + 0.18,#2 - 1.12) and (#1 + 0.10,#2 - 0.88) .. (#1 - 0.02,#2 - 0.76);
+    \fi
+  \else
+    \draw[line width=0.8pt] (#1 + 0.12,#2) -- (#1 + 0.12,#2 + 1.35);
+    \ifdim #3pt < 1pt
+      \draw[line width=0.8pt]
+        (#1 + 0.12,#2 + 1.35)
+        .. controls (#1 + 0.42,#2 + 1.12) and (#1 + 0.34,#2 + 0.88) .. (#1 + 0.22,#2 + 0.76);
+    \fi
+  \fi
+}
+
+\newcommand{\drawnotesymbol}[4]{%
+  \pgfmathsetmacro{\x}{\staffleft + (#1) * \beatspacing}
+  \pgfmathsetmacro{\y}{\pitchy{#2}}
+  \def\noteduration{#3}%
+  \drawledgerlines{\x}{\y}
+  \drawaccidental{\x}{\y}{\pitchaccidental{#2}}
+  \ifdim \noteduration pt > 3pt
+    \draw[rotate around={-18:(\x,\y)}, line width=0.8pt] (\x,\y) ellipse (0.18 and 0.12);
+  \else\ifdim \noteduration pt > 1pt
+    \draw[rotate around={-18:(\x,\y)}, line width=0.8pt] (\x,\y) ellipse (0.16 and 0.11);
+    \drawstemandflags{\x}{\y}{\noteduration}
+  \else
+    \fill[rotate around={-18:(\x,\y)}] (\x,\y) ellipse (0.15 and 0.11);
+    \drawstemandflags{\x}{\y}{\noteduration}
+  \fi\fi
+  \node[font=\tiny, align=center] at (\x,-1.00) {#4};
+}
+
+\newcommand{\drawrestsymbol}[3]{%
+  \pgfmathsetmacro{\x}{\staffleft + (#1) * \beatspacing}
+  \def\restduration{#2}%
+  \ifdim \restduration pt > 3pt
+    \fill (\x - 0.18,1.20) rectangle (\x + 0.18,1.05);
+  \else\ifdim \restduration pt > 1pt
+    \fill (\x - 0.18,1.55) rectangle (\x + 0.18,1.40);
+  \else\ifdim \restduration pt < 1pt
+    \begin{scope}[shift={(\x,1.20)}, line width=0.8pt]
+      \draw
+        (0.02,0.58)
+        .. controls (0.17,0.38) and (0.00,0.20) .. (0.11,0.00)
+        .. controls (0.22,-0.18) and (0.06,-0.38) .. (-0.04,-0.54);
+      \draw (0.09,0.10) .. controls (0.26,-0.02) and (0.18,-0.20) .. (0.04,-0.30);
+      \draw (-0.02,-0.54) -- (0.15,-0.92);
+    \end{scope}
+  \else
+    \begin{scope}[shift={(\x,1.10)}, line width=0.8pt]
+      \draw
+        (0.03,0.62)
+        .. controls (0.19,0.40) and (-0.02,0.20) .. (0.15,-0.02)
+        .. controls (0.28,-0.22) and (0.12,-0.42) .. (-0.02,-0.58);
+      \draw (0.13,0.32) -- (-0.10,-0.06);
+      \draw (-0.02,-0.58) -- (0.16,-0.95);
+    \end{scope}
+  \fi\fi\fi
+  \node[font=\tiny, align=center] at (\x,-1.00) {#3};
 }
 
 \newcommand{\musicline}[1]{%
@@ -79,90 +189,128 @@
   \end{center}
 }
 
+\newcommand{\resetmusicstate}{%
+  \gdef\currentmusiccommands{}%
+  \xdef\linebeat{0}%
+}
+
+\newcommand{\flushmusicline}{%
+  \ifx\currentmusiccommands\@empty\else
+    \musicline{\currentmusiccommands}%
+    \gdef\currentmusiccommands{}%
+    \xdef\linebeat{0}%
+  \fi
+}
+
+\newcommand{\ensurelinecapacity}[1]{%
+  \pgfmathparse{\linebeat + (#1) > \beatsperline ? 1 : 0}%
+  \ifnum\pgfmathresult=1
+    \flushmusicline
+  \fi
+}
+
+\newcommand{\advancebeat}[1]{%
+  \pgfmathparse{\linebeat + (#1)}%
+  \xdef\linebeat{\pgfmathresult}%
+}
+
+\newcommand{\NoteEvent}[3]{%
+  \ensurelinecapacity{#2}%
+  \edef\eventstart{\linebeat}%
+  \g@addto@macro\currentmusiccommands{\drawnotesymbol{\eventstart}{#1}{#2}{#3}}%
+  \advancebeat{#2}%
+}
+
+\newcommand{\RestEvent}[2]{%
+  \ensurelinecapacity{#1}%
+  \edef\eventstart{\linebeat}%
+  \g@addto@macro\currentmusiccommands{\drawrestsymbol{\eventstart}{#1}{#2}}%
+  \advancebeat{#1}%
+}
+
+\newcommand{\RenderTranscription}[1]{%
+  \resetmusicstate
+  #1%
+  \flushmusicline
+}
+
+\newcommand{\transcriptiondata}{%
+  \NoteEvent{C3}{1}{Dad-}
+  \NoteEvent{C3}{1}{dy}
+  \NoteEvent{D3}{1}{and}
+  \NoteEvent{E3}{1}{Zo-}
+  \NoteEvent{G3}{1}{ey}
+  \NoteEvent{G3}{1}{are}
+  \NoteEvent{E3}{1}{go-}
+  \NoteEvent{D3}{1}{ing}
+  \NoteEvent{C3}{1}{for}
+  \NoteEvent{D3}{1}{a}
+  \NoteEvent{E3}{1}{morn-}
+  \NoteEvent{D3}{1}{ing}
+  \NoteEvent{C3}{1}{walk.}
+  \RestEvent{1}{}
+  \RestEvent{1}{}
+  \RestEvent{1}{}
+  \NoteEvent{C3}{1}{Dad-}
+  \NoteEvent{C3}{1}{dy}
+  \NoteEvent{D3}{1}{and}
+  \NoteEvent{E3}{1}{Zo-}
+  \NoteEvent{G3}{1}{ey}
+  \NoteEvent{G3}{1}{are}
+  \NoteEvent{E3}{1}{go-}
+  \NoteEvent{D3}{1}{ing}
+  \NoteEvent{C3}{1}{for}
+  \NoteEvent{D3}{1}{a}
+  \NoteEvent{E3}{1}{morn-}
+  \NoteEvent{D3}{1}{ing}
+  \NoteEvent{C3}{1}{walk.}
+  \RestEvent{1}{}
+  \RestEvent{1}{}
+  \RestEvent{1}{}
+  \NoteEvent{E3}{1}{There}
+  \NoteEvent{E3}{1}{is}
+  \NoteEvent{G3}{1}{sun.}
+  \NoteEvent{G3}{1}{There}
+  \NoteEvent{A3}{1}{is}
+  \NoteEvent{A3}{1}{fun.}
+  \NoteEvent{G3}{1}{There's}
+  \NoteEvent{F3}{1}{some}
+  \NoteEvent{E3}{1}{bus-}
+  \NoteEvent{E3}{1}{i-}
+  \NoteEvent{D3}{1}{ness}
+  \NoteEvent{D3}{1}{that's}
+  \NoteEvent{C3}{1}{gon-}
+  \NoteEvent{C3}{1}{na}
+  \NoteEvent{D3}{1}{get}
+  \NoteEvent{C3}{1}{done.}
+  \NoteEvent{C3}{1}{Dad-}
+  \NoteEvent{C3}{1}{dy}
+  \NoteEvent{D3}{1}{and}
+  \NoteEvent{E3}{1}{Zo-}
+  \NoteEvent{G3}{1}{ey}
+  \NoteEvent{G3}{1}{are}
+  \NoteEvent{E3}{1}{go-}
+  \NoteEvent{D3}{1}{ing}
+  \NoteEvent{C3}{1}{for}
+  \NoteEvent{D3}{1}{a}
+  \NoteEvent{E3}{1}{morn-}
+  \NoteEvent{D3}{1}{ing}
+  \NoteEvent{C3}{1}{walk.}
+  \RestEvent{1}{}
+  \RestEvent{1}{}
+  \RestEvent{1}{}
+}
+
 \begin{document}
 
 \section*{Approximate Transcription}
 \noindent Source recording: \url{signal-2026-09-15-08-11-29-091.aac}
 
-This is an automatically derived, approximate transcription from the AAC recording. The melody is now shown in a simple sheet-music layout with a bass clef, quarter notes, and quarter rests while still compiling directly with pdfLaTeX.
+This is an automatically derived, approximate transcription from the AAC recording. The melody is rendered by reusable TikZ notation macros that generate a bass clef, staff, noteheads, stems, rests, bar lines, lyrics, and automatic line breaks while still compiling directly with pdfLaTeX.
 
 \medskip
 \noindent Approximate setting: C major, common time, bass register.
 
-\musicline{%
-  \qnote{1}{C}{Dad-}
-  \qnote{2}{C}{dy}
-  \qnote{3}{D}{and}
-  \qnote{4}{E}{Zo-}
-  \qnote{5}{G}{ey}
-  \qnote{6}{G}{are}
-  \qnote{7}{E}{go-}
-  \qnote{8}{D}{ing}
-  \qnote{9}{C}{for}
-  \qnote{10}{D}{a}
-  \qnote{11}{E}{morn-}
-  \qnote{12}{D}{ing}
-  \qnote{13}{C}{walk.}
-  \qrest{14}{}
-  \qrest{15}{}
-  \qrest{16}{}
-}
-
-\musicline{%
-  \qnote{1}{C}{Dad-}
-  \qnote{2}{C}{dy}
-  \qnote{3}{D}{and}
-  \qnote{4}{E}{Zo-}
-  \qnote{5}{G}{ey}
-  \qnote{6}{G}{are}
-  \qnote{7}{E}{go-}
-  \qnote{8}{D}{ing}
-  \qnote{9}{C}{for}
-  \qnote{10}{D}{a}
-  \qnote{11}{E}{morn-}
-  \qnote{12}{D}{ing}
-  \qnote{13}{C}{walk.}
-  \qrest{14}{}
-  \qrest{15}{}
-  \qrest{16}{}
-}
-
-\musicline{%
-  \qnote{1}{E}{There}
-  \qnote{2}{E}{is}
-  \qnote{3}{G}{sun.}
-  \qnote{4}{G}{There}
-  \qnote{5}{A}{is}
-  \qnote{6}{A}{fun.}
-  \qnote{7}{G}{There's}
-  \qnote{8}{F}{some}
-  \qnote{9}{E}{bus-}
-  \qnote{10}{E}{i-}
-  \qnote{11}{D}{ness}
-  \qnote{12}{D}{that's}
-  \qnote{13}{C}{gon-}
-  \qnote{14}{C}{na}
-  \qnote{15}{D}{get}
-  \qnote{16}{C}{done.}
-}
-
-\musicline{%
-  \qnote{1}{C}{Dad-}
-  \qnote{2}{C}{dy}
-  \qnote{3}{D}{and}
-  \qnote{4}{E}{Zo-}
-  \qnote{5}{G}{ey}
-  \qnote{6}{G}{are}
-  \qnote{7}{E}{go-}
-  \qnote{8}{D}{ing}
-  \qnote{9}{C}{for}
-  \qnote{10}{D}{a}
-  \qnote{11}{E}{morn-}
-  \qnote{12}{D}{ing}
-  \qnote{13}{C}{walk.}
-  \qrest{14}{}
-  \qrest{15}{}
-  \qrest{16}{}
-}
+\RenderTranscription{\transcriptiondata}
 
 \end{document}
