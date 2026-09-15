@@ -210,6 +210,10 @@
 }
 
 \newcommand{\validateeventduration}[1]{%
+  \pgfmathparse{#1 <= 0 ? 1 : 0}%
+  \ifnum\pgfmathresult=1
+    \PackageError{transcription}{Event duration #1 must be positive}{Use a duration greater than zero.}%
+  \fi
   \pgfmathparse{#1 > \beatspermeasure ? 1 : 0}%
   \ifnum\pgfmathresult=1
     \PackageError{transcription}{Event duration #1 exceeds beats per measure \beatspermeasure}{Split the event across measures or increase \string\beatspermeasure.}%
@@ -254,13 +258,25 @@
   \fi
 }
 
-\newcommand{\NoteEvent}[3]{%
-  \validateeventduration{#2}%
-  \pgfmathparse{\linebeat + (#2) > \beatsperline ? 1 : 0}%
+\newcommand{\prepareforevent}[1]{%
+  \pgfmathparse{\linebeat >= \beatsperline ? 1 : 0}%
   \ifnum\pgfmathresult=1
-    \padtomeasureboundary
     \flushmusicline
   \fi
+  \pgfmathparse{\linebeat + (#1) > \beatsperline ? 1 : 0}%
+  \ifnum\pgfmathresult=1
+    \pgfmathsetmacro{\measureoffset}{mod(\linebeat,\beatspermeasure)}%
+    \pgfmathparse{\measureoffset > 0 ? 1 : 0}%
+    \ifnum\pgfmathresult=1
+      \padtomeasureboundary
+    \fi
+    \flushmusicline
+  \fi
+}
+
+\newcommand{\NoteEvent}[3]{%
+  \validateeventduration{#2}%
+  \prepareforevent{#2}%
   \edef\eventstart{\linebeat}%
   \appendnotecommand{\eventstart}{#1}{#2}{#3}%
   \advancebeat{#2}%
@@ -268,11 +284,7 @@
 
 \newcommand{\RestEvent}[2]{%
   \validateeventduration{#1}%
-  \pgfmathparse{\linebeat + (#1) > \beatsperline ? 1 : 0}%
-  \ifnum\pgfmathresult=1
-    \padtomeasureboundary
-    \flushmusicline
-  \fi
+  \prepareforevent{#1}%
   \edef\eventstart{\linebeat}%
   \appendrestcommand{\eventstart}{#1}{#2}%
   \advancebeat{#1}%
