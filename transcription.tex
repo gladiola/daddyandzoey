@@ -217,14 +217,28 @@
 \newcommand{\NoteEvent}[3]{%
   \ensurelinecapacity{#2}%
   \edef\eventstart{\linebeat}%
-  \g@addto@macro\currentmusiccommands{\drawnotesymbol{\eventstart}{#1}{#2}{#3}}%
+  \begingroup
+  \edef\next{%
+    \endgroup
+    \noexpand\g@addto@macro\noexpand\currentmusiccommands{%
+      \noexpand\drawnotesymbol{\eventstart}{#1}{#2}{#3}%
+    }%
+  }%
+  \next
   \advancebeat{#2}%
 }
 
 \newcommand{\RestEvent}[2]{%
   \ensurelinecapacity{#1}%
   \edef\eventstart{\linebeat}%
-  \g@addto@macro\currentmusiccommands{\drawrestsymbol{\eventstart}{#1}{#2}}%
+  \begingroup
+  \edef\next{%
+    \endgroup
+    \noexpand\g@addto@macro\noexpand\currentmusiccommands{%
+      \noexpand\drawrestsymbol{\eventstart}{#1}{#2}%
+    }%
+  }%
+  \next
   \advancebeat{#1}%
 }
 
