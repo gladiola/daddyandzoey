@@ -1,7 +1,12 @@
 \documentclass[12pt]{article}
 \usepackage[margin=1in]{geometry}
+\usepackage{iftex}
+\ifLuaTeX\else
+  \errmessage{This document must be compiled with LuaLaTeX}
+  \expandafter\endinput
+\fi
+\usepackage{lyluatex}
 \usepackage{url}
-\usepackage{verbatim}
 \pagestyle{plain}
 
 \begin{document}
@@ -9,27 +14,40 @@
 \section*{Approximate Transcription}
 \noindent Source recording: \url{signal-2026-09-15-08-11-29-091.aac}
 
-This is an automatically derived, approximate monophonic transcription from the AAC recording.
+This is an automatically derived, approximate transcription from the AAC recording, engraved as sheet music with lyrics.
 
-\bigskip
-\noindent\textbf{Performance notes}
-\begin{itemize}
-  \item Clef: bass
-  \item Key: C minor
-  \item Time: 4/4
-  \item Tempo: quarter note = 152
-\end{itemize}
+\begin{lilypond}
+\version "2.24.0"
+\header { tagline = ##f }
 
-\noindent\textbf{Approximate note sequence}
+melody = \relative c' {
+  \clef bass
+  \key c \major
+  \time 4/4
+  \tempo 4 = 120
+  \autoBeamOff
+  \cadenzaOn
 
-\begin{verbatim}
-ees4 e16 g2 d4
-des\breve
-b,4 ees8 e8 fis8. a4 fis8.
-ees4 des1.
-bes,2 des4 b,4 c8 ees4 e2
-d4. d4. f8 f4 fis8 g4 g8.
-gis4 g2. bes,4. ees2 e2 d2
-\end{verbatim}
+  c4 c d e g g e d c d e d c \bar "|"
+  c4 c d e g g e d c d e d c \bar "|"
+  e4 e g g a a g f e e d d c c d c \bar "|"
+  c4 c d e g g e d c d e d c \bar "|."
+}
+
+words = \lyricmode {
+  Dad -- dy and Zo -- ey are go -- ing for a morn -- ing walk.
+  Dad -- dy and Zo -- ey are go -- ing for a morn -- ing walk.
+  There is sun. There is fun. There's some bus -- i -- ness that's gon -- na get done.
+  Dad -- dy and Zo -- ey are go -- ing for a morn -- ing walk.
+}
+
+\score {
+  <<
+    \new Staff { \new Voice = "melody" { \melody } }
+    \new Lyrics \lyricsto "melody" \words
+  >>
+  \layout { }
+}
+\end{lilypond}
 
 \end{document}
