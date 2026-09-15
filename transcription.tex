@@ -1,5 +1,11 @@
+% !TeX program = lualatex
 \documentclass[12pt]{article}
 \usepackage[margin=1in]{geometry}
+\usepackage{iftex}
+\ifLuaTeX\else
+  \errmessage{This document must be compiled with LuaLaTeX}
+  \expandafter\endinput
+\fi
 \usepackage{lyluatex}
 \pagestyle{plain}
 
