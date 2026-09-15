@@ -115,7 +115,7 @@
 }
 
 \newcommand{\drawstemandflags}[3]{%
-  \pgfmathparse{#2 > 1 ? 1 : 0}%
+  \pgfmathparse{#2 > 1.75 ? 1 : 0}%
   \ifnum\pgfmathresult=1
     \draw[line width=0.8pt] (#1 - 0.12,#2) -- (#1 - 0.12,#2 - 1.35);
     \ifdim #3pt < 1pt
@@ -221,39 +221,67 @@
   \xdef\linebeat{\pgfmathresult}%
 }
 
-\newcommand{\NoteEvent}[3]{%
-  \validateeventduration{#2}%
-  \ensurelinecapacity{#2}%
-  \edef\eventstart{\linebeat}%
+\newcommand{\appendnotecommand}[4]{%
   \begingroup
   \edef\next{%
     \endgroup
     \noexpand\g@addto@macro\noexpand\currentmusiccommands{%
-      \noexpand\drawnotesymbol{\eventstart}{#1}{#2}{#3}%
+      \noexpand\drawnotesymbol{#1}{#2}{#3}{#4}%
     }%
   }%
   \next
+}
+
+\newcommand{\appendrestcommand}[3]{%
+  \begingroup
+  \edef\next{%
+    \endgroup
+    \noexpand\g@addto@macro\noexpand\currentmusiccommands{%
+      \noexpand\drawrestsymbol{#1}{#2}{#3}%
+    }%
+  }%
+  \next
+}
+
+\newcommand{\padtomeasureboundary}{%
+  \pgfmathsetmacro{\measureoffset}{mod(\linebeat,\beatspermeasure)}%
+  \pgfmathparse{\measureoffset > 0 ? 1 : 0}%
+  \ifnum\pgfmathresult=1
+    \pgfmathparse{\beatspermeasure - \measureoffset}%
+    \xdef\paddingduration{\pgfmathresult}%
+    \appendrestcommand{\linebeat}{\paddingduration}{}%
+    \advancebeat{\paddingduration}%
+  \fi
+}
+
+\newcommand{\NoteEvent}[3]{%
+  \validateeventduration{#2}%
+  \pgfmathparse{\linebeat + (#2) > \beatsperline ? 1 : 0}%
+  \ifnum\pgfmathresult=1
+    \padtomeasureboundary
+    \flushmusicline
+  \fi
+  \edef\eventstart{\linebeat}%
+  \appendnotecommand{\eventstart}{#1}{#2}{#3}%
   \advancebeat{#2}%
 }
 
 \newcommand{\RestEvent}[2]{%
   \validateeventduration{#1}%
-  \ensurelinecapacity{#1}%
+  \pgfmathparse{\linebeat + (#1) > \beatsperline ? 1 : 0}%
+  \ifnum\pgfmathresult=1
+    \padtomeasureboundary
+    \flushmusicline
+  \fi
   \edef\eventstart{\linebeat}%
-  \begingroup
-  \edef\next{%
-    \endgroup
-    \noexpand\g@addto@macro\noexpand\currentmusiccommands{%
-      \noexpand\drawrestsymbol{\eventstart}{#1}{#2}%
-    }%
-  }%
-  \next
+  \appendrestcommand{\eventstart}{#1}{#2}%
   \advancebeat{#1}%
 }
 
 \newcommand{\RenderTranscription}[1]{%
   \resetmusicstate
   #1%
+  \padtomeasureboundary
   \flushmusicline
 }
 
