@@ -265,7 +265,7 @@
 
 \newcommand{\validateeventfit}[1]{%
   \pgfmathsetmacro{\measureoffset}{mod(\linebeat,\beatspermeasure)}%
-  \pgfmathparse{\measureoffset == 0 ? \beatspermeasure : \beatspermeasure - \measureoffset}%
+  \pgfmathparse{abs(\measureoffset) < 0.001 || abs(\measureoffset - \beatspermeasure) < 0.001 ? \beatspermeasure : \beatspermeasure - \measureoffset}%
   \xdef\remainingmeasurebeats{\pgfmathresult}%
   \pgfmathparse{#1 > \remainingmeasurebeats ? 1 : 0}%
   \ifnum\pgfmathresult=1
