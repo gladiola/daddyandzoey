@@ -16,4 +16,6 @@ If you use `latexmk`, this repository includes a `.latexmkrc` that selects pdfLa
 latexmk transcription.tex
 ```
 
-The transcription presents the approximate melody in a simple sheet-music layout with a bass clef, quarter notes, quarter rests, and aligned lyric syllables.
+The transcription presents the approximate melody in a simple sheet-music layout with a bass clef, aligned lyric syllables, and reusable TikZ notation macros for whole, half, quarter, and eighth notes/rests, staff rendering, and automatic line breaks.
+
+The build is fully local and deterministic: it does not require LilyPond, external notation fonts, PDF-to-image conversion, or any download step.
