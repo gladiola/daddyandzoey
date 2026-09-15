@@ -230,7 +230,7 @@
 }
 
 \newcommand{\advancebeat}[1]{%
-  \pgfmathparse{\linebeat + (#1)}%
+  \pgfmathparse{round((\linebeat + (#1)) * 2) / 2}%
   \xdef\linebeat{\pgfmathresult}%
 }
 
@@ -257,7 +257,7 @@
 }
 
 \newcommand{\prepareforsegment}{%
-  \pgfmathparse{\linebeat >= \beatsperline ? 1 : 0}%
+  \pgfmathparse{\linebeat > \beatsperline - 0.001 ? 1 : 0}%
   \ifnum\pgfmathresult=1
     \flushmusicline
   \fi
