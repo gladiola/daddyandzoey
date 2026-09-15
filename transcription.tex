@@ -211,13 +211,6 @@
   \fi
 }
 
-\newcommand{\ensurelinecapacity}[1]{%
-  \pgfmathparse{\linebeat + (#1) > \beatsperline ? 1 : 0}%
-  \ifnum\pgfmathresult=1
-    \flushmusicline
-  \fi
-}
-
 \newcommand{\validateeventduration}[1]{%
   \pgfmathparse{#1 <= 0 ? 1 : 0}%
   \ifnum\pgfmathresult=1
@@ -228,6 +221,12 @@
   \else
     \PackageError{transcription}{Event duration #1 is not supported}{Use exact whole, half, quarter, or eighth-note values.}%
   \fi
+}
+
+\newcommand{\validatepitch}[1]{%
+  \@ifundefined{pitch@#1}{%
+    \PackageError{transcription}{Unknown pitch token #1}{Define the pitch with \string\definepitch\space before using it in \string\NoteEvent.}%
+  }{}%
 }
 
 \newcommand{\advancebeat}[1]{%
@@ -275,6 +274,7 @@
 }
 
 \newcommand{\NoteEvent}[3]{%
+  \validatepitch{#1}%
   \validateeventduration{#2}%
   \prepareforsegment
   \validateeventfit{#2}%
