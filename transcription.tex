@@ -21,7 +21,7 @@ This is an automatically derived, approximate transcription from the AAC recordi
 \header { tagline = ##f }
 
 melody = \relative c' {
-  \clef treble
+  \clef bass
   \key c \major
   \time 4/4
   \tempo 4 = 120
@@ -30,7 +30,7 @@ melody = \relative c' {
 
   c4 c d e g g e d c d e d c \bar "|"
   c4 c d e g g e d c d e d c \bar "|"
-  e4 e g g a a g f e e d d c c \bar "|"
+  e4 e g g a a g f e e d d c c d c \bar "|"
   c4 c d e g g e d c d e d c \bar "|."
 }
 
@@ -43,7 +43,7 @@ words = \lyricmode {
 
 \score {
   <<
-    \new Staff \melody
+    \new Staff { \new Voice = "melody" { \melody } }
     \new Lyrics \lyricsto "melody" \words
   >>
   \layout { }
