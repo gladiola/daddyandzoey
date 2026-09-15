@@ -234,26 +234,23 @@
   \xdef\linebeat{\pgfmathresult}%
 }
 
-\newcommand{\appendnotecommand}[4]{%
+\newcommand{\appenddrawingcommand}[1]{%
   \begingroup
   \edef\next{%
     \endgroup
     \noexpand\g@addto@macro\noexpand\currentmusiccommands{%
-      \noexpand\drawnotesymbol{#1}{#2}{#3}{#4}%
+      #1%
     }%
   }%
   \next
 }
 
+\newcommand{\appendnotecommand}[4]{%
+  \appenddrawingcommand{\noexpand\drawnotesymbol{#1}{#2}{#3}{#4}}%
+}
+
 \newcommand{\appendrestcommand}[3]{%
-  \begingroup
-  \edef\next{%
-    \endgroup
-    \noexpand\g@addto@macro\noexpand\currentmusiccommands{%
-      \noexpand\drawrestsymbol{#1}{#2}{#3}%
-    }%
-  }%
-  \next
+  \appenddrawingcommand{\noexpand\drawrestsymbol{#1}{#2}{#3}}%
 }
 
 \newcommand{\prepareforsegment}{%
@@ -264,10 +261,11 @@
 }
 
 \newcommand{\validateeventfit}[1]{%
-  \pgfmathsetmacro{\measureoffset}{mod(\linebeat,\beatspermeasure)}%
-  \pgfmathparse{abs(\measureoffset) < 0.001 || abs(\measureoffset - \beatspermeasure) < 0.001 ? \beatspermeasure : \beatspermeasure - \measureoffset}%
+  \pgfmathparse{round(mod(\linebeat,\beatspermeasure) * 2) / 2}%
+  \xdef\measureoffset{\pgfmathresult}%
+  \pgfmathparse{abs(\measureoffset) < 0.001 || abs(\measureoffset - \beatspermeasure) < 0.001 ? \beatspermeasure : round((\beatspermeasure - \measureoffset) * 2) / 2}%
   \xdef\remainingmeasurebeats{\pgfmathresult}%
-  \pgfmathparse{\linebeat + (#1) > \beatsperline + 0.001 ? 1 : 0}%
+  \pgfmathparse{round((\linebeat + (#1)) * 2) / 2 > \beatsperline ? 1 : 0}%
   \ifnum\pgfmathresult=1
     \PackageError{transcription}{Event duration #1 exceeds the remaining line width}{Start a new staff line or shorten the event before the final bar.}%
   \fi
