@@ -209,12 +209,20 @@
   \fi
 }
 
+\newcommand{\validateeventduration}[1]{%
+  \pgfmathparse{#1 > \beatsperline ? 1 : 0}%
+  \ifnum\pgfmathresult=1
+    \PackageError{transcription}{Event duration #1 exceeds beats per line \beatsperline}{Reduce the event duration or increase \string\beatsperline.}%
+  \fi
+}
+
 \newcommand{\advancebeat}[1]{%
   \pgfmathparse{\linebeat + (#1)}%
   \xdef\linebeat{\pgfmathresult}%
 }
 
 \newcommand{\NoteEvent}[3]{%
+  \validateeventduration{#2}%
   \ensurelinecapacity{#2}%
   \edef\eventstart{\linebeat}%
   \begingroup
@@ -229,6 +237,7 @@
 }
 
 \newcommand{\RestEvent}[2]{%
+  \validateeventduration{#1}%
   \ensurelinecapacity{#1}%
   \edef\eventstart{\linebeat}%
   \begingroup
