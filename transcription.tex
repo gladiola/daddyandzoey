@@ -223,9 +223,10 @@
   \ifnum\pgfmathresult=1
     \PackageError{transcription}{Event duration #1 must be positive}{Use a duration greater than zero.}%
   \fi
-  \pgfmathparse{abs((#1) * 2 - round((#1) * 2)) > 0.001 ? 1 : 0}%
+  \pgfmathparse{abs(#1 - 4) < 0.001 ? 1 : (abs(#1 - 2) < 0.001 ? 1 : (abs(#1 - 1) < 0.001 ? 1 : (abs(#1 - 0.5) < 0.001 ? 1 : 0)))}%
   \ifnum\pgfmathresult=1
-    \PackageError{transcription}{Event duration #1 is not supported}{Use durations in half-beat increments.}%
+  \else
+    \PackageError{transcription}{Event duration #1 is not supported}{Use exact whole, half, quarter, or eighth-note values.}%
   \fi
 }
 
@@ -263,59 +264,32 @@
   \fi
 }
 
-\newcommand{\selectsegmentduration}[1]{%
-  \pgfmathparse{(#1) >= 4 ? 4 : ((#1) >= 2 ? 2 : ((#1) >= 1 ? 1 : 0.5))}%
-  \xdef\segmentduration{\pgfmathresult}%
+\newcommand{\validateeventfit}[1]{%
+  \pgfmathsetmacro{\measureoffset}{mod(\linebeat,\beatspermeasure)}%
+  \pgfmathparse{\measureoffset == 0 ? \beatspermeasure : \beatspermeasure - \measureoffset}%
+  \xdef\remainingmeasurebeats{\pgfmathresult}%
+  \pgfmathparse{#1 > \remainingmeasurebeats ? 1 : 0}%
+  \ifnum\pgfmathresult=1
+    \PackageError{transcription}{Event duration #1 crosses a measure boundary}{Split the event into tied notes or separate rests before the next bar line.}%
+  \fi
 }
 
 \newcommand{\NoteEvent}[3]{%
   \validateeventduration{#2}%
-  \xdef\remainingduration{#2}%
-  \def\currentlyric{#3}%
-  \loop
-    \pgfmathparse{\remainingduration > 0 ? 1 : 0}%
-  \ifnum\pgfmathresult=1
-    \prepareforsegment
-    \pgfmathsetmacro{\measureoffset}{mod(\linebeat,\beatspermeasure)}%
-    \pgfmathparse{\measureoffset == 0 ? \beatspermeasure : \beatspermeasure - \measureoffset}%
-    \xdef\spaceinmeasure{\pgfmathresult}%
-    \pgfmathparse{\beatsperline - \linebeat}%
-    \xdef\spaceinline{\pgfmathresult}%
-    \pgfmathparse{min(\remainingduration, min(\spaceinmeasure, \spaceinline))}%
-    \xdef\segmentlimit{\pgfmathresult}%
-    \selectsegmentduration{\segmentlimit}%
-    \edef\eventstart{\linebeat}%
-    \appendnotecommand{\eventstart}{#1}{\segmentduration}{\currentlyric}%
-    \advancebeat{\segmentduration}%
-    \pgfmathparse{\remainingduration - \segmentduration}%
-    \xdef\remainingduration{\pgfmathresult}%
-    \def\currentlyric{}%
-  \repeat
+  \prepareforsegment
+  \validateeventfit{#2}%
+  \edef\eventstart{\linebeat}%
+  \appendnotecommand{\eventstart}{#1}{#2}{#3}%
+  \advancebeat{#2}%
 }
 
 \newcommand{\RestEvent}[2]{%
   \validateeventduration{#1}%
-  \xdef\remainingduration{#1}%
-  \def\currentrestlyric{#2}%
-  \loop
-    \pgfmathparse{\remainingduration > 0 ? 1 : 0}%
-  \ifnum\pgfmathresult=1
-    \prepareforsegment
-    \pgfmathsetmacro{\measureoffset}{mod(\linebeat,\beatspermeasure)}%
-    \pgfmathparse{\measureoffset == 0 ? \beatspermeasure : \beatspermeasure - \measureoffset}%
-    \xdef\spaceinmeasure{\pgfmathresult}%
-    \pgfmathparse{\beatsperline - \linebeat}%
-    \xdef\spaceinline{\pgfmathresult}%
-    \pgfmathparse{min(\remainingduration, min(\spaceinmeasure, \spaceinline))}%
-    \xdef\segmentlimit{\pgfmathresult}%
-    \selectsegmentduration{\segmentlimit}%
-    \edef\eventstart{\linebeat}%
-    \appendrestcommand{\eventstart}{\segmentduration}{\currentrestlyric}%
-    \advancebeat{\segmentduration}%
-    \pgfmathparse{\remainingduration - \segmentduration}%
-    \xdef\remainingduration{\pgfmathresult}%
-    \def\currentrestlyric{}%
-  \repeat
+  \prepareforsegment
+  \validateeventfit{#1}%
+  \edef\eventstart{\linebeat}%
+  \appendrestcommand{\eventstart}{#1}{#2}%
+  \advancebeat{#1}%
 }
 
 \newcommand{\RenderTranscription}[1]{%
