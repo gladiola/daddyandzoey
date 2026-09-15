@@ -10,8 +10,10 @@ Compile `transcription.tex` with pdfLaTeX:
 pdflatex transcription.tex
 ```
 
-If you use `latexmk`, this repository includes a `.latexmkrc` that selects pdfLaTeX automatically:
+If you use `latexmk`, run it in PDF mode:
 
 ```bash
 latexmk -pdf transcription.tex
 ```
+
+The repository also includes a `.latexmkrc` with `$pdf_mode = 1`.
