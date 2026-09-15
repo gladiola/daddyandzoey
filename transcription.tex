@@ -257,7 +257,7 @@
 }
 
 \newcommand{\prepareforsegment}{%
-  \pgfmathparse{\linebeat > \beatsperline - 0.001 ? 1 : 0}%
+  \pgfmathparse{\linebeat >= \beatsperline || abs(\linebeat - \beatsperline) < 0.001 ? 1 : 0}%
   \ifnum\pgfmathresult=1
     \flushmusicline
   \fi
