@@ -85,7 +85,7 @@
 
 \newcommand{\drawaccidental}[3]{%
   \def\accidentaltype{#3}%
-  \ifx\accidentaltype\@empty\else
+  \if\relax\detokenize\expandafter{\accidentaltype}\relax\else
     \def\sharpsymbol{sharp}%
     \def\flatsymbol{flat}%
     \def\naturalsymbol{natural}%
@@ -199,14 +199,14 @@
 }
 
 \newcommand{\resetmusicstate}{%
-  \gdef\currentmusiccommands{}%
+  \global\let\currentmusiccommands\@empty
   \xdef\linebeat{0}%
 }
 
 \newcommand{\flushmusicline}{%
   \ifx\currentmusiccommands\@empty\else
     \musicline{\currentmusiccommands}{\linebeat}%
-    \gdef\currentmusiccommands{}%
+    \global\let\currentmusiccommands\@empty
     \xdef\linebeat{0}%
   \fi
 }
