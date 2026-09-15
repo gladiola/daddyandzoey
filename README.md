@@ -16,4 +16,4 @@ If you use `latexmk`, this repository includes a `.latexmkrc` that selects pdfLa
 latexmk transcription.tex
 ```
 
-The transcription presents the approximate melody as note names with aligned lyric syllables.
+The transcription presents the approximate melody in a simple sheet-music layout with a bass clef, quarter notes, quarter rests, and aligned lyric syllables.
