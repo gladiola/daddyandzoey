@@ -1,17 +1,19 @@
 # daddyandzoey
 
-This repository contains an AAC recording and a LilyPond-based LaTeX transcription.
+This repository contains an AAC recording and a LaTeX transcription.
 
 ## Build
 
-Compile `transcription.tex` with **LuaLaTeX** and `--shell-escape`, not XeLaTeX or pdfLaTeX:
+Compile `transcription.tex` with pdfLaTeX:
 
 ```bash
-lualatex --shell-escape transcription.tex
+pdflatex transcription.tex
 ```
 
-If you use `latexmk`, this repository includes a `.latexmkrc` that selects LuaLaTeX and enables `--shell-escape` automatically:
+If you use `latexmk`, run it in PDF mode:
 
 ```bash
-latexmk transcription.tex
+latexmk -pdf transcription.tex
 ```
+
+The repository also includes a `.latexmkrc` with `$pdf_mode = 1`.
