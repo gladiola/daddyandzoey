@@ -1,19 +1,19 @@
 # daddyandzoey
 
-This repository contains an AAC recording and a LilyPond-based LaTeX transcription.
+This repository contains an AAC recording and a LaTeX transcription.
 
 ## Build
 
-Compile `transcription.tex` with LuaLaTeX and `--shell-escape`:
+Compile `transcription.tex` with pdfLaTeX:
 
 ```bash
-lualatex --shell-escape transcription.tex
+pdflatex transcription.tex
 ```
 
-If you use `latexmk`, this repository includes a `.latexmkrc` that selects LuaLaTeX and enables `--shell-escape` automatically:
+If you use `latexmk`, this repository includes a `.latexmkrc` that selects pdfLaTeX automatically:
 
 ```bash
 latexmk transcription.tex
 ```
 
-The score is engraved with LilyPond and includes lyrics under the staff.
+The transcription presents the approximate melody as note names with aligned lyric syllables.

@@ -1,53 +1,45 @@
 \documentclass[12pt]{article}
 \usepackage[margin=1in]{geometry}
-\usepackage{iftex}
-\ifLuaTeX\else
-  \errmessage{This document must be compiled with LuaLaTeX}
-  \expandafter\endinput
-\fi
-\usepackage{lyluatex}
+\usepackage[T1]{fontenc}
+\usepackage{array}
 \usepackage{url}
 \pagestyle{plain}
+
+\newcommand{\transcriptionline}[2]{%
+  \begin{center}
+  \setlength{\tabcolsep}{0.45em}
+  \renewcommand{\arraystretch}{1.15}
+  \begin{tabular}{*{16}{>{\centering\arraybackslash}p{1.55em}}}
+    #1 \\
+    #2 \\
+  \end{tabular}
+  \end{center}
+}
 
 \begin{document}
 
 \section*{Approximate Transcription}
 \noindent Source recording: \url{signal-2026-09-15-08-11-29-091.aac}
 
-This is an automatically derived, approximate transcription from the AAC recording, engraved as sheet music with lyrics.
+This is an automatically derived, approximate transcription from the AAC recording. The melody is summarized below as note names with aligned lyric syllables, avoiding any external engraving dependency during compilation.
 
-\begin{lilypond}
-\version "2.24.0"
-\header { tagline = ##f }
+\medskip
+\noindent Approximate setting: C major, common time, bass register.
 
-melody = \relative c' {
-  \clef bass
-  \key c \major
-  \time 4/4
-  \tempo 4 = 120
-  \autoBeamOff
-  \cadenzaOn
+\transcriptionline
+  {C & C & D & E & G & G & E & D & C & D & E & D & C & & &}
+  {Dad- & dy & and & Zo- & ey & are & go- & ing & for & a & morn- & ing & walk. & & &}
 
-  c4 c d e g g e d c d e d c \bar "|"
-  c4 c d e g g e d c d e d c \bar "|"
-  e4 e g g a a g f e e d d c c d c \bar "|"
-  c4 c d e g g e d c d e d c \bar "|."
-}
+\transcriptionline
+  {C & C & D & E & G & G & E & D & C & D & E & D & C & & &}
+  {Dad- & dy & and & Zo- & ey & are & go- & ing & for & a & morn- & ing & walk. & & &}
 
-words = \lyricmode {
-  Dad -- dy and Zo -- ey are go -- ing for a morn -- ing walk.
-  Dad -- dy and Zo -- ey are go -- ing for a morn -- ing walk.
-  There is sun. There is fun. There's some bus -- i -- ness that's gon -- na get done.
-  Dad -- dy and Zo -- ey are go -- ing for a morn -- ing walk.
-}
+\transcriptionline
+  {E & E & G & G & A & A & G & F & E & E & D & D & C & C & D & C}
+  {There & is & sun. & There & is & fun. & There's & some & bus- & i- & ness & that's & gon- & na & get & done.}
 
-\score {
-  <<
-    \new Staff { \new Voice = "melody" { \melody } }
-    \new Lyrics \lyricsto "melody" \words
-  >>
-  \layout { }
-}
-\end{lilypond}
+\transcriptionline
+  {C & C & D & E & G & G & E & D & C & D & E & D & C & & &}
+  {Dad- & dy & and & Zo- & ey & are & go- & ing & for & a & morn- & ing & walk. & & &}
 
 \end{document}
