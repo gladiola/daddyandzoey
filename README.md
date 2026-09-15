@@ -13,5 +13,5 @@ pdflatex transcription.tex
 If you use `latexmk`, this repository includes a `.latexmkrc` that selects pdfLaTeX automatically:
 
 ```bash
-latexmk transcription.tex
+latexmk -pdf transcription.tex
 ```
