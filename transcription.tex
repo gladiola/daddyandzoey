@@ -13,8 +13,6 @@
 }
 \newcommand{\pitchy}[1]{\csname pitch@#1\endcsname}
 \newcommand{\pitchaccidental}[1]{\csname accidental@#1\endcsname}
-\makeatother
-
 \definepitch{E2}{-1.50}{}
 \definepitch{F2}{-1.25}{}
 \definepitch{Fs2}{-1.25}{sharp}
@@ -299,6 +297,8 @@
   #1%
   \flushmusicline
 }
+
+\makeatother
 
 \newcommand{\transcriptiondata}{%
   \NoteEvent{C3}{1}{Dad-}
